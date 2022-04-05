@@ -1,78 +1,128 @@
+/*  
+- LCA of n1 and n2 using one DFS on the Tree 
+- Distance between n1 and n2 = dis(n1,root)+dis(n2,root)-2dis(lca(n1,n2),root) 
+- Use struct to store the adjacent vertices of v and the distance from v to the adjacent vertices
+*/
 #include <stdio.h>
 #include <iostream>
-#include<vector>
-#include <queue>
+#include <vector>
+#include <string.h>
+
 using namespace std;
+#define MAXN 100005
+#define level 18
+ 
+vector <int> tree[MAXN];
+int depth[MAXN];
+int parent[MAXN][level];
+int Len[MAXN];  //disance betwee node and root
 
-const int NMAX = 50000;
-const int distance[NMAX][NMAX];
+typedef struct {
+    int u; //adjacent vertices of v
+    int w; //distance between v and u
+} edge;
 
-int distan[50001]; //distan[i] - distance between note i and root 0
+vector <edge> tree1[MAXN];
 
-void process3(int N, int T[100], int P[100][100]) {
-  int i, j;
+/* LCA of n1 and n2 using one DFS on the Tree  */
 
-  // Khởi tạo
-  for (i = 0; i < N; i++)
-    for (j = 0; 1 << j < N; j++)
-      P[i][j] = -1;
-
-  // Khởi tạo cha thứ 2^0 = 1 của mỗi nút
-  for (i = 0; i < N; i++)
-    P[i][0] = T[i];
-
-  // Quy hoạch động
-  for (j = 1; 1 << j < N; j++)
-    for (i = 0; i < N; i++)
-      if (P[i][j - 1] != -1)
-        P[i][j] = P[P[i][j - 1]][j - 1];
+// pre-compute the depth for each node and their
+// first parent(2^0th parent)
+// time complexity : O(n)
+void dfs(int cur, int prev, int leng) {
+    Len[cur] = Len[prev] + leng;
+    depth[cur] = depth[prev] + 1;
+    parent[cur][0] = prev;
+    for (int i=0; i<tree1[cur].size(); i++) {
+        if (tree1[cur][i].u != prev)
+            dfs(tree1[cur][i].u, cur, tree1[cur][i].u);
+    }
+}
+ 
+// Dynamic Programming Sparse Matrix Approach
+// populating 2^i parent for each node
+// Time complexity : O(nlogn)
+void precomputeSparseMatrix(int n) {
+    for (int i=1; i<level; i++) {
+        for (int node = 1; node <= n; node++) {
+            if (parent[node][i-1] != -1)
+                parent[node][i] = parent[parent[node][i-1]][i-1];
+        }
+    }
+}
+ 
+// Returning the LCA of u and v
+// Time complexity : O(log n)
+int lca(int u, int v) {
+    if (depth[v] < depth[u])
+        swap(u, v);
+ 
+    int diff = depth[v] - depth[u];
+ 
+    // Step 1 of the pseudocode
+    for (int i=0; i<level; i++)
+        if ((diff>>i)&1)
+            v = parent[v][i];
+ 
+    // now depth[u] == depth[v]
+    if (u == v)
+        return u;
+ 
+    // Step 2 of the pseudocode
+    for (int i=level-1; i>=0; i--)
+        if (parent[u][i] != parent[v][i]) {
+            u = parent[u][i];
+            v = parent[v][i];
+        }
+ 
+    return parent[u][0];
 }
 
-int dfs(int node, int parent[50001]) { // find deep of node i
-  if (node == 0) {
-    return 1;
-  }
-  else {
-    return dfs(parent[node], parent) + 1;
-  }
-} 
+void addEdge(int u,int v, int w) {
+    tree1[u].push_back({v,w});
+    tree1[v].push_back({u,w});
+}
 
-  
 int main() {
-  int n, m;
-  cin >> n;
-  int parent[n],deep[n]; 
-  /*
-    - parent[n] : parent[i] - parent of i;
-    - deep[n] : deep[i] - deep of node i
-    - destance [n][n] : destance[i][j] - distance between node i and j
-  */
-  parent [0] = 0;
-  for (int i = 1; i < n; i++) {
-    parent[i] = -1;
-  }
-  for (int i = 0; i < n-1; i++) {
-    int a,b,c;  
-    cin >> a >> b >> c;
-    if (parent[a] == -1) parent[a] = b; 
-    else parent[b] = a;
-    distance[a][b] = c; 
-    distance[b][a] = c;
-  }
-  // for (int i = 0; i < n; i++) {
-  //   cout << "Parent of node " << i << " la: " << parent[i] << " and deep of node " << i << " = " << dfs(i, parent) << " and distance -> 0: " << finddistan(i,parent,distance) << endl;
-  // }
-
-
-
-
-  // cout << endl;
-	// int P[100][100];
-	// int T[] = {0,0,0,1,1,1,2,6,6};
-	// process3(9,T,P);
-	// for (int i = 0; i < 9; i++) {
-	// 	for (int j = 0; 1 << j < 9; j++)
-	// 		cout << P[i][j] << " "; 
-	// 	cout << endl;
-	// }
+    memset(parent,-1,sizeof(parent));
+    vector<int> result;
+    int n;
+    cin >> n;
+    for (int i = 1; i <= n; i++) {
+      Len[i] = -1;
+    }
+    Len[1] = 0;
+    for (int i = 0; i < n-1; i++) {
+      int u, v, w;
+      cin >> u >> v >> w;
+      addEdge(u+1,v+1,w);
+    //   if (Len[u+1] == -1) Len[u+1] = Len[v+1] + w;
+    //   if (Len[v+1] == -1) Len[v+1] = Len[u+1] + w;
+      // else Len[v+1] = Len[u+1] + w; 
+    }
+    depth[0] = 0;
+ 
+    // running dfs and precalculating depth of each node.
+    dfs(1,0,0);
+ 
+    // Precomputing the 2^i th ancestor for every node
+    precomputeSparseMatrix(n);
+    /*for (int i = 0; i <= 5; i++ ) {
+      cout << Len[i] << " ";
+    }
+    cout << endl;*/
+    for (int i = 1; i <= n; i++)
+      cout << depth[i] << " ";
+    cout << endl;
+    int m;
+    cin >> m;
+	  for (int i = 1; i <= m; i++) {
+		  int u, v;
+		  cin >> u >> v;
+		  result.push_back(Len[u+1] + Len[v+1] - 2 * Len[lca(u+1, v+1)]);
+		  //cout << (Len[u+1] + Len[v+1] - 2 * Len[lca(u+1, v+1)]) << "\n";
+	  }
+	  for (int i = 0; i < m; i++)
+	    cout << result[i] << endl;
+    return 0;
 }

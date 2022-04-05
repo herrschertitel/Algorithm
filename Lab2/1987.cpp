@@ -15,7 +15,7 @@ int main() {
     vector <int> result;
     int a[100001], b[100001];
     cin >> n;
-    segment listsegment[n];
+    segment listsegment[100001];
     int max_r = 0;
     for (int i = 0; i < n; i++) {
         cin >> listsegment[i].l_point >> listsegment[i].r_point;
