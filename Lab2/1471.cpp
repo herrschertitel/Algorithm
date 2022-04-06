@@ -1,8 +1,8 @@
-/*  
+/******************************************************************************  
 - LCA of n1 and n2 using one DFS on the Tree 
 - Distance between n1 and n2 = dis(n1,root)+dis(n2,root)-2dis(lca(n1,n2),root) 
 - Use struct to store the adjacent vertices of v and the distance from v to the adjacent vertices
-*/
+*******************************************************************************/
 #include <stdio.h>
 #include <iostream>
 #include <vector>
@@ -10,9 +10,9 @@
 
 using namespace std;
 #define MAXN 100005
-#define level 18
+#define level 16
  
-vector <int> tree[MAXN];
+// vector <int> tree[MAXN];
 int depth[MAXN];
 int parent[MAXN][level];
 int Len[MAXN];  //disance betwee node and root
@@ -35,7 +35,7 @@ void dfs(int cur, int prev, int leng) {
     parent[cur][0] = prev;
     for (int i=0; i<tree1[cur].size(); i++) {
         if (tree1[cur][i].u != prev)
-            dfs(tree1[cur][i].u, cur, tree1[cur][i].u);
+            dfs(tree1[cur][i].u, cur, tree1[cur][i].w);
     }
 }
  
@@ -88,17 +88,10 @@ int main() {
     vector<int> result;
     int n;
     cin >> n;
-    for (int i = 1; i <= n; i++) {
-      Len[i] = -1;
-    }
-    Len[1] = 0;
     for (int i = 0; i < n-1; i++) {
       int u, v, w;
       cin >> u >> v >> w;
       addEdge(u+1,v+1,w);
-    //   if (Len[u+1] == -1) Len[u+1] = Len[v+1] + w;
-    //   if (Len[v+1] == -1) Len[v+1] = Len[u+1] + w;
-      // else Len[v+1] = Len[u+1] + w; 
     }
     depth[0] = 0;
  
@@ -107,20 +100,12 @@ int main() {
  
     // Precomputing the 2^i th ancestor for every node
     precomputeSparseMatrix(n);
-    /*for (int i = 0; i <= 5; i++ ) {
-      cout << Len[i] << " ";
-    }
-    cout << endl;*/
-    for (int i = 1; i <= n; i++)
-      cout << depth[i] << " ";
-    cout << endl;
     int m;
     cin >> m;
 	  for (int i = 1; i <= m; i++) {
 		  int u, v;
 		  cin >> u >> v;
 		  result.push_back(Len[u+1] + Len[v+1] - 2 * Len[lca(u+1, v+1)]);
-		  //cout << (Len[u+1] + Len[v+1] - 2 * Len[lca(u+1, v+1)]) << "\n";
 	  }
 	  for (int i = 0; i < m; i++)
 	    cout << result[i] << endl;
