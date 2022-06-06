@@ -50,7 +50,7 @@ int furthest(int u, int n) {
     while (qu.size()) {
         u = qu.front();
         qu.pop();
-        for (int i = 0; i < listadj_ver[u].size(); i++){
+        for (int i = 0; i < listadj_ver[u].size(); i++) {
             if (check[listadj_ver[u][i]]) continue;
             check[listadj_ver[u][i]]= true;
             qu.push(listadj_ver[u][i]);

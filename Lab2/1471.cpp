@@ -55,7 +55,7 @@ void precomputeSparseMatrix(int n) {
 // Time complexity : O(log n)
 int lca(int u, int v) {
     if (depth[v] < depth[u])
-        swap(u, v);
+        swap(u, v); 
  
     int diff = depth[v] - depth[u];
  
